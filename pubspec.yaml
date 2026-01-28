@@ -1,0 +1,43 @@
+name: fionleo_flutter_movieapp
+description: "A new Flutter project for movie discovery and information."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  cached_network_image: ^3.2.3
+  connectivity_plus: ^7.0.0
+  firebase_core: ^4.4.0
+  firebase_messaging: ^16.1.1
+  flutter:
+    sdk: flutter
+  flutter_dotenv: ^5.0.2
+  flutter_svg: ^2.0.7
+  intl: ^0.19.0
+  hive_flutter: ^1.1.0
+  http: ^1.1.0
+  path_provider: ^2.1.5
+  provider: ^6.0.5
+  pull_to_refresh: ^2.0.0
+  url_launcher: ^6.1.10
+  webview_flutter: ^4.7.0
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/icons/app_icon.png"
+  remove_alpha_ios: true
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
