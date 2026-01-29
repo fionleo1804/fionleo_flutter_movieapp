@@ -13,41 +13,31 @@ import 'screens/home.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print("Background Message Received: ${message.messageId}");
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: ".env");
 
-    if (!kIsWeb) {
-      await Firebase.initializeApp();
-      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  if (!kIsWeb) {
+    await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-      NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+    NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
-      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-        await FirebaseMessaging.instance.subscribeToTopic("external_testers");
-        String? token = await FirebaseMessaging.instance.getToken();
-        debugPrint("FCM Token: $token");
-      }
-      await NotificationService.initialize();
-    } else {
-      debugPrint("Web detected: Skipping Firebase initialization");
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      await FirebaseMessaging.instance.subscribeToTopic("external_testers");
     }
-
-    await Hive.initFlutter();
-    await Hive.openBox('movie_cache');
-
-  } catch (e) {
-    debugPrint("Initialization Error: $e");
+    await NotificationService.initialize();
   }
+
+  await Hive.initFlutter();
+  await Hive.openBox('movie_cache');
 
   runApp(
     MultiProvider(
@@ -71,7 +61,7 @@ class MovieApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        primarySwatch: Colors.blue,
+        primaryColor: Colors.blue,
         scaffoldBackgroundColor: const Color(0xFF000000), 
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFF000000),

@@ -40,8 +40,8 @@ class MovieProvider extends ChangeNotifier {
         _movies = fetchedMovies;
       }
       _page++;
-    } catch (e) {
-      debugPrint('Error fetching movies: $e');
+    } catch (_) {
+
     } finally {
       _isLoading = false;
       notifyListeners();

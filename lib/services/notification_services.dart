@@ -1,11 +1,9 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  debugPrint("Handling background message: ${message.messageId}");
 }
 
 class NotificationService {
@@ -19,11 +17,8 @@ class NotificationService {
     );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      String? token = await _fcm.getToken();
-      debugPrint("FCM Token: $token");
-
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        debugPrint("Foreground message: ${message.notification?.title}");
+        // local notification logic here if needed
       });
     }
   }

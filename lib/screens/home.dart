@@ -70,9 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
         await _movieBox.put('cached_movies', results.map((m) => m.toJson()).toList());
       }
 
-    } catch (e) {
-      debugPrint("Error loading movies: $e");
-      
+    } catch (_) {
       if (movies.isEmpty && _movieBox.containsKey('cached_movies')) {
         final List cachedData = _movieBox.get('cached_movies');
         setState(() {
