@@ -95,9 +95,25 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              movie.title, 
-                              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)
+                              movie.originalTitle,
+                              style: const TextStyle(
+                                fontSize: 34, 
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -1.0,
+                                color: Colors.white,
+                              ),
                             ),
+                            if (movie.originalTitle != movie.title) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                movie.title,
+                                style: TextStyle(
+                                  fontSize: 20, 
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withOpacity(0.6),
+                                ),
+                              ),
+                            ],
                             const SizedBox(height: 12),
                             MovieMetadataRow(movie: movie, certification: certification),
                             const SizedBox(height: 20),
