@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../models/movie.dart';
 import '../services/api_services.dart';
 import '../services/connectivity_service.dart';
@@ -136,21 +135,12 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                     return;
                                   }
 
-                                  const String urlString = 'https://www.google.com';
-
-                                  if (kIsWeb) {
-                                    final Uri url = Uri.parse(urlString);
-                                    if (await canLaunchUrl(url)) {
-                                      await launchUrl(url, mode: LaunchMode.externalApplication);
-                                    }
-                                  } else {
-                                    Navigator.push(
-                                      context, 
-                                      MaterialPageRoute(
-                                        builder: (_) => BookingWebViewPage(url: urlString),
-                                      ),
-                                    );
-                                  }
+                                  Navigator.push(
+                                    context, 
+                                    MaterialPageRoute(
+                                      builder: (_) => BookingWebViewPage(url: 'https://www.google.com'),
+                                    ),
+                                  );
                                 },
                               ),
                             ),

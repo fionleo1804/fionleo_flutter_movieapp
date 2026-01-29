@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../constants.dart';
 import '../models/movie.dart';
 import '../screens/booking_webview.dart';
@@ -14,21 +13,15 @@ class MovieCard extends StatelessWidget {
 
   const MovieCard({super.key, required this.movie});
 
-  Future<void> _launchBooking(BuildContext context) async {
-    final Uri url = Uri.parse('https://www.google.com');
+  void _openBookingWebView(BuildContext context) {
+    const String bookingUrl = 'https://www.google.com';
 
-    if (kIsWeb) {
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      }
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => BookingWebViewPage(url: url.toString()),
-        ),
-      );
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const BookingWebViewPage(url: bookingUrl),
+      ),
+    );
   }
 
   @override
@@ -96,7 +89,7 @@ class MovieCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(6),
                             ),
                           ),
-                          onPressed: () => _launchBooking(context),
+                          onPressed: () => _openBookingWebView(context),
                           child: const Text(
                             'BOOK',
                             style: TextStyle(
