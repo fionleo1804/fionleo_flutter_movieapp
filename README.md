@@ -1,6 +1,6 @@
 **FL MovieApp**
 
-A high-performance movie database built with Flutter to provide a seamless app-link epxerience with offline caching, an internal WebView booking system (currently point to Google) and real-time Firebase push notification.
+A high-performance movie database built with Flutter to provide a seamless app-link experience with offline caching, an internal WebView booking system (currently point to Google) and real-time Firebase push notification.
 
 🚀 Features
 
