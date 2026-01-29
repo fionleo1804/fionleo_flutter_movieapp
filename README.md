@@ -44,11 +44,16 @@ To ensure the internal WebView avoids "Gray Screen" security blocks on Android, 
 1. Clean the project:
 
 `flutter clean`
+
 `flutter pub get`
 
-2. Build optimized APKs:
+2. Build APKs:
 
-`flutter build apk --release --split-per-abi`
+`flutter build apk --release`
+
+3. For Google Play Store
+
+`flutter build appbundle --release`
 
 **Wiki**
 For detailed logic, API documentation, and architecture, please visit the Wiki:
