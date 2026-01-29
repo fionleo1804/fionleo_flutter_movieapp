@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -110,11 +111,24 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final connectivityService = Provider.of<ConnectivityService>(context);
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    int getColumns() {
+      if (screenWidth < 992) {
+        return 2;
+      } else if (screenWidth < 1200) {
+        return 3;
+      } else {
+        return 5;
+      }
+    }
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (bool didPop, dynamic result) async {
         if (didPop) return;
+
+        if (kIsWeb) return;
 
         final shouldExit = await _showExitConfirmation(context);
         if (shouldExit == true && context.mounted) {
@@ -144,47 +158,65 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        body: Column(
-          children: [
-            ConnectionStatusBanner(
-              isOffline: connectivityService.isOffline,
-              showOnlineBanner: connectivityService.showOnlineBanner,
-            ),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: () => _loadMovies(refresh: true),
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  slivers: [
-                    SliverPadding(
-                      padding: const EdgeInsets.all(10),
-                      sliver: movies.isEmpty && !_loading
-                          ? const SliverToBoxAdapter(child: Center(child: Text("No movies available offline.")))
-                          : SliverGrid(
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 10,
-                                crossAxisSpacing: 10,
-                                childAspectRatio: 0.65,
-                              ),
-                              delegate: SliverChildBuilderDelegate(
-                                (context, index) => MovieCard(movie: movies[index]),
-                                childCount: movies.length,
+        body: Center( // Keeps content centered on ultra-wide screens
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1400),
+            child: Column(
+              children: [
+                ConnectionStatusBanner(
+                  isOffline: connectivityService.isOffline,
+                  showOnlineBanner: connectivityService.showOnlineBanner,
+                ),
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: () => _loadMovies(refresh: true),
+                    child: CustomScrollView(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
+                      slivers: [
+                        SliverPadding(
+                          padding: const EdgeInsets.all(10),
+                          sliver: movies.isEmpty && !_loading
+                              ? const SliverToBoxAdapter(
+                                  child: Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.only(top: 100),
+                                      child: Text("No movies available offline."),
+                                    ),
+                                  ),
+                                )
+                              : SliverGrid(
+                                  // Removed 'const' so crossAxisCount can update dynamically
+                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: getColumns(),
+                                    mainAxisSpacing: 10,
+                                    crossAxisSpacing: 10,
+                                    childAspectRatio: 0.68, // Standard Movie Poster Aspect Ratio
+                                  ),
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) => MovieCard(movie: movies[index]),
+                                    childCount: movies.length,
+                                  ),
+                                ),
+                        ),
+                        if (_hasMore && !connectivityService.isOffline)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 32),
+                              child: Center(
+                                child: _loading 
+                                  ? const CircularProgressIndicator() 
+                                  : const SizedBox.shrink(),
                               ),
                             ),
+                          ),
+                      ],
                     ),
-                    if (_hasMore && !_isOffline)
-                      SliverToBoxAdapter(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 32),
-                          child: const Center(child: CircularProgressIndicator()),
-                        ),
-                      ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -192,7 +224,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _connectivitySubscription.cancel();
     _scrollController.dispose();
     super.dispose();
   }

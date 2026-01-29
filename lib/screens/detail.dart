@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/movie.dart';
 import '../services/api_services.dart';
 import '../services/connectivity_service.dart';
@@ -68,7 +70,10 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(movie.title)),
+      appBar: AppBar(
+        title: Text(movie.title),
+        centerTitle: kIsWeb,
+      ),
       body: Column(
         children: [
           ConnectionStatusBanner(
@@ -76,52 +81,86 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
             showOnlineBanner: conn.showOnlineBanner,
           ),
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  MovieDetailHeader(movie: movie),
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(movie.title, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 8),
-                        MovieMetadataRow(movie: movie, certification: certification),
-                        const SizedBox(height: 16),
-                        MovieGenreChips(movie: movie),
-                        const Divider(height: 32),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 850),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      MovieDetailHeader(movie: movie),
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            InfoColumn(label: 'Release Date', value: movie.releaseDate),
-                            InfoColumn(label: 'Rating', value: movie.popularity.toInt().toString()),
-                            InfoColumn(label: 'Language', value: movie.originalLanguage.toUpperCase()),
+                            Text(
+                              movie.title, 
+                              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)
+                            ),
+                            const SizedBox(height: 12),
+                            MovieMetadataRow(movie: movie, certification: certification),
+                            const SizedBox(height: 20),
+                            MovieGenreChips(movie: movie),
+                            const Divider(height: 48),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                InfoColumn(label: 'Release Date', value: movie.releaseDate),
+                                InfoColumn(label: 'Rating', value: movie.popularity.toInt().toString()),
+                                InfoColumn(label: 'Language', value: movie.originalLanguage.toUpperCase()),
+                              ],
+                            ),
+                            const SizedBox(height: 32),
+                            const Text('Synopsis', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 12),
+                            Text(
+                              movie.overview, 
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.8), 
+                                height: 1.6, 
+                                fontSize: 16
+                              )
+                            ),
+                            const SizedBox(height: 40),
+                            
+                            SizedBox(
+                              width: double.infinity,
+                              child: BookingButton(
+                                isOffline: conn.isOffline,
+                                onPressed: () async {
+                                  if (conn.isOffline) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text("Internet required for booking.")));
+                                    return;
+                                  }
+
+                                  const String urlString = 'https://www.google.com';
+
+                                  if (kIsWeb) {
+                                    final Uri url = Uri.parse(urlString);
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url, mode: LaunchMode.externalApplication);
+                                    }
+                                  } else {
+                                    Navigator.push(
+                                      context, 
+                                      MaterialPageRoute(
+                                        builder: (_) => BookingWebViewPage(url: urlString),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 50),
                           ],
                         ),
-                        const SizedBox(height: 24),
-                        const Text('Synopsis', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 8),
-                        Text(movie.overview, style: TextStyle(color: Colors.white.withOpacity(0.8), height: 1.5)),
-                        const SizedBox(height: 30),
-                        
-                        BookingButton(
-                          isOffline: conn.isOffline,
-                          onPressed: () {
-                            if (conn.isOffline) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Internet required for booking.")));
-                            } else {
-                              Navigator.push(context, MaterialPageRoute(
-                                builder: (_) => BookingWebViewPage(url: 'https://www.google.com')));
-                            }
-                          },
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

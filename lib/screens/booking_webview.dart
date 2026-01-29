@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -21,6 +22,12 @@ class _BookingWebViewPageState extends State<BookingWebViewPage> {
   void initState() {
     super.initState();
 
+    if (!kIsWeb) {
+      _controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..loadRequest(Uri.parse(widget.url));
+    }
+
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
@@ -36,15 +43,10 @@ class _BookingWebViewPageState extends State<BookingWebViewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Book Movie'),
-      ),
-      body: Stack(
-        children: [
-          WebViewWidget(controller: _controller),
-          if (isLoading) const Center(child: CircularProgressIndicator()),
-        ],
-      ),
+      appBar: AppBar(title: const Text("Booking")),
+      body: kIsWeb 
+        ? Center(child: Text("WebView is not supported on Web. Use URL Launcher instead."))
+        : WebViewWidget(controller: _controller),
     );
   }
 }

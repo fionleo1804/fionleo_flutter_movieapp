@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -9,26 +10,43 @@ import 'services/notification_services.dart';
 import 'providers/movie_provider.dart';
 import 'screens/home.dart';
 
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("Background Message Received: ${message.messageId}");
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
     await dotenv.load(fileName: ".env");
 
-    await Firebase.initializeApp();
+    if (!kIsWeb) {
+      await Firebase.initializeApp();
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    await FirebaseMessaging.instance.subscribeToTopic("external_testers");
-    String? token = await FirebaseMessaging.instance.getToken();
-    print("DEBUG: FCM Token: $token");
+      NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
 
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-    await NotificationService.initialize();
+      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        await FirebaseMessaging.instance.subscribeToTopic("external_testers");
+        String? token = await FirebaseMessaging.instance.getToken();
+        debugPrint("FCM Token: $token");
+      }
+      await NotificationService.initialize();
+    } else {
+      debugPrint("Web detected: Skipping Firebase initialization");
+    }
 
     await Hive.initFlutter();
     await Hive.openBox('movie_cache');
 
   } catch (e) {
-    print("DEBUG: Initialization Error: $e");
+    debugPrint("Initialization Error: $e");
   }
 
   runApp(
